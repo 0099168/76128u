@@ -1,0 +1,257 @@
+跳到内容
+泰克森币
+/
+泰克森现金
+民众
+代码
+问题
+拉取请求
+1
+行动
+项目
+维基
+安全
+洞察力
+泰克森现金/ Makefile.am
+@tixoncoin
+tixoncoin 源上传
+ 1 位 贡献者
+可执行文件  225 行 (169 sloc)  8.37 KB
+#版权所有 (c) 2013-2016 比特币核心开发人员
+#在 MIT 软件许可下分发，见随附
+#复制文件或 http://www.opensource.org/licenses/mit-license.php。
+
+ACLOCAL_AMFLAGS = -I build-aux/m4
+子目录= src
+.PHONY : 部署 FORCE
+
+GZIP_ENV ="-9n"
+导出 Python 路径
+
+BITCOIND_BIN = $( top_builddir ) /src/ $( BITCOIN_DAEMON_NAME )$( EXEEXT )
+BITCOIN_QT_BIN = $( top_builddir ) /src/qt/ $( BITCOIN_GUI_NAME )$( EXEEXT )
+BITCOIN_CLI_BIN = $( top_builddir ) /src/ $( BITCOIN_CLI_NAME )$( EXEEXT )
+BITCOIN_WIN_INSTALLER = $( PACKAGE ) - $( PACKAGE_VERSION ) -win $( WINDOWS_BITS ) -setup $( EXEEXT )
+
+空：=
+空间:= $(空)  $(空)
+
+OSX_APP =Tixoncash-Qt.app
+OSX_VOLNAME = $( subst  $( space ) ,-, $( PACKAGE_NAME ) )
+OSX_DMG = $( OSX_VOLNAME ) .dmg
+OSX_BACKGROUND_SVG =background.svg
+OSX_BACKGROUND_IMAGE =background.tiff
+OSX_BACKGROUND_IMAGE_DPIS =36 72
+OSX_DSSTORE_GEN = $( top_srcdir ) /contrib/macdeploy/custom_dsstore.py
+OSX_DEPLOY_SCRIPT = $( top_srcdir ) /contrib/macdeploy/macdeployqtplus
+OSX_FANCY_PLIST = $( top_srcdir ) /contrib/macdeploy/fancy.plist
+OSX_INSTALLER_ICONS = $( top_srcdir ) /src/qt/res/icons/bitcoin.icns
+OSX_PLIST = $( top_builddir ) /share/qt/Info.plist #未安装
+OSX_QT_TRANSLATIONS = da,de,es,hu,ru,uk,zh_CN,zh_TW
+
+DIST_DOCS = $(通配符doc/ * .md)  $(通配符doc/release-notes/ * .md)
+
+WINDOWS_PACKAGING = $( top_srcdir ) /share/pixmaps/bitcoin.ico \
+  $( top_srcdir ) /share/pixmaps/nsis-header.bmp \
+  $( top_srcdir ) /share/pixmaps/nsis-wizard.bmp \
+  $( top_srcdir ) /doc/README_windows.txt
+
+OSX_PACKAGING = $( OSX_DEPLOY_SCRIPT )  $( OSX_FANCY_PLIST )  $( OSX_INSTALLER_ICONS )  \
+  $( top_srcdir ) /contrib/macdeploy/ $( OSX_BACKGROUND_SVG )  \
+  $( OSX_DSSTORE_GEN )  \
+  $( top_srcdir ) /contrib/macdeploy/detached-sig-apply.sh \
+  $( top_srcdir ) /contrib/macdeploy/detached-sig-create.sh
+
+COVERAGE_INFO =baseline_filtered_combined.infobaseline.info block_test.info \
+  leveldb_baseline.info test_tixoncash_filtered.info total_coverage.info \
+  base_filtered.info block_test_filtered.info \
+  leveldb_baseline_filtered.info test_tixoncash_coverage.info test_tixoncash.info
+
+分区钩子：
+	- $( MAKE ) -C $( top_distdir ) /src/leveldb clean
+	- $( MAKE ) -C $( top_distdir ) /src/secp256k1 distclean
+	- $( GIT )存档 --format=tar HEAD -- src/clientversion.cpp |  $( AMTAR ) -C $( top_distdir ) -xf -
+
+distcheck钩子：
+	$( MKDIR_P )  $( top_distdir ) /_build/src/leveldb
+	cp -rf $( top_srcdir ) /src/leveldb/ *  $( top_distdir ) /_build/src/leveldb/
+	- $( MAKE ) -C $( top_distdir ) /_build/src/leveldb clean
+
+清洁检查：
+	@：
+
+$( BITCOIN_WIN_INSTALLER )：全递归
+	$( MKDIR_P )  $( top_builddir ) /release
+	STRIPPROG= " $( STRIP ) "  $( INSTALL_STRIP_PROGRAM )  $( BITCOIND_BIN )  $( top_builddir ) /release
+	STRIPPROG= " $( STRIP ) "  $( INSTALL_STRIP_PROGRAM )  $( BITCOIN_QT_BIN )  $( top_builddir ) /release
+	STRIPPROG= " $( STRIP ) "  $( INSTALL_STRIP_PROGRAM )  $( BITCOIN_CLI_BIN )  $( top_builddir ) /release
+	@test -f $( MAKENSIS )  &&  $( MAKENSIS ) -V2 $( top_builddir ) /share/setup.nsi ||  \
+	  回声错误：无法构建$@
+	@echo 内置$@
+
+$( OSX_APP ) /Contents/PkgInfo :
+	$( MKDIR_P )  $( @D )
+	@echo “ APPL???? ”  >  $@
+
+$( OSX_APP ) /Contents/Resources/empty.lproj :
+	$( MKDIR_P )  $( @D )
+@	触摸$@
+
+$( OSX_APP ) /Contents/Info.plist : $( OSX_PLIST )
+	$( MKDIR_P )  $( @D )
+	$( INSTALL_DATA )  $<  $@
+
+$( OSX_APP ) /Contents/Resources/bitcoin.icns : $( OSX_INSTALLER_ICONS )
+	$( MKDIR_P )  $( @D )
+	$( INSTALL_DATA )  $<  $@
+
+$( OSX_APP ) /Contents/MacOS/Tixoncash-Qt : $( BITCOIN_QT_BIN )
+	$( MKDIR_P )  $( @D )
+	STRIPPROG= " $( STRIP ) "  $( INSTALL_STRIP_PROGRAM )   $<  $@
+
+$( OSX_APP ) /Contents/Resources/Base.lproj/InfoPlist.strings：
+	$( MKDIR_P )  $( @D )
+	echo  ' { CFBundleDisplayName = "$(PACKAGE_NAME)"; CFBundleName = "$(PACKAGE_NAME)"; } '  >  $@
+
+OSX_APP_BUILT = $( OSX_APP ) /Contents/PkgInfo $( OSX_APP ) /Contents/Resources/empty.lproj \
+  $( OSX_APP ) /Contents/Resources/bitcoin.icns $( OSX_APP ) /Contents/Info.plist \
+  $( OSX_APP ) /Contents/MacOS/Tixoncash-Qt $( OSX_APP ) /Contents/Resources/Base.lproj/InfoPlist.strings
+
+osx_volname :
+	回声 $( OSX_VOLNAME )  > $@
+
+如果 BUILD_DARWIN
+$( OSX_DMG ) : $( OSX_APP_BUILT )  $( OSX_PACKAGING )  $( OSX_BACKGROUND_IMAGE )
+	$（PYTHON） $（OSX_DEPLOY_SCRIPT） $（OSX_APP） -add-QT-TR $（OSX_QT_TRANSLATIONS） -translations-DIR = $（QT_TRANSLATION_DIR） -dmg -fancy $（OSX_FANCY_PLIST） -verbose 2 -volname $（OSX_VOLNAME）
+
+$( OSX_BACKGROUND_IMAGE ) .png : contrib/macdeploy/ $( OSX_BACKGROUND_SVG )
+	sed ' s/PACKAGE_NAME/$(PACKAGE_NAME)/ '  <  " $< "  |  $( RSVG_CONVERT ) -f png -d 36 -p 36 -o $@
+$( OSX_BACKGROUND_IMAGE ) @2x.png : contrib/macdeploy/ $( OSX_BACKGROUND_SVG )
+	sed ' s/PACKAGE_NAME/$(PACKAGE_NAME)/ '  <  " $< "  |  $( RSVG_CONVERT ) -f png -d 72 -p 72 -o $@
+$( OSX_BACKGROUND_IMAGE ) : $( OSX_BACKGROUND_IMAGE ) .png $( OSX_BACKGROUND_IMAGE ) @2x.png
+	tiffutil -cathidpicheck $^ -out $@
+
+deploydir：$（OSX_DMG）
+别的
+APP_DIST_DIR = $( top_builddir ) /dist
+APP_DIST_EXTRAS = $( APP_DIST_DIR ) /.background/ $( OSX_BACKGROUND_IMAGE )  $( APP_DIST_DIR ) /.DS_Store $( APP_DIST_DIR ) /Applications
+
+$( APP_DIST_DIR ) /应用程序：
+	@rm -f $@
+	@cd $(@ D ) ;  $( LN_S ) /应用程序$( @F )
+
+$( APP_DIST_EXTRAS ) : $( APP_DIST_DIR ) / $( OSX_APP ) /Contents/MacOS/Tixoncash-Qt
+
+$( OSX_DMG ) : $( APP_DIST_EXTRAS )
+	$( GENISOIMAGE ) -no-cache-inodes -D -l -probe -V " $( OSX_VOLNAME ) " -no-pad -r -dir-mode 0755 -apple -o $@ dist
+
+dpi % . $( OSX_BACKGROUND_IMAGE ) : contrib/macdeploy/ $( OSX_BACKGROUND_SVG )
+	sed ' s/PACKAGE_NAME/$(PACKAGE_NAME)/ '  <  " $< "  |  $( RSVG_CONVERT ) -f png -d $* -p $*  |  $( IMAGEMAGICK_CONVERT ) - $@
+OSX_BACKGROUND_IMAGE_DPIFILES := $( foreach dpi, $( OSX_BACKGROUND_IMAGE_DPIS ) ,dpi $( dpi ) . $( OSX_BACKGROUND_IMAGE ) )
+$( APP_DIST_DIR ) /.background/ $( OSX_BACKGROUND_IMAGE ) : $( OSX_BACKGROUND_IMAGE_DPIFILES )
+	$( MKDIR_P )  $( @D )
+	$( TIFFCP ) -c 无$( OSX_BACKGROUND_IMAGE_DPIFILES )  $@
+
+$( APP_DIST_DIR ) /.DS_Store : $( OSX_DSSTORE_GEN )
+	$( PYTHON )  $<  " $@ "  " $( OSX_VOLNAME ) "
+
+$( APP_DIST_DIR ) / $( OSX_APP ) /Contents/MacOS/Tixoncash-Qt : $( OSX_APP_BUILT )  $( OSX_PACKAGING )
+	INSTALLNAMETOOL = $（INSTALLNAMETOOL）   OTOOL = $（OTOOL） STRIP = $（STRIP） $（PYTHON） $（OSX_DEPLOY_SCRIPT） $（OSX_APP） -translations-DIR = $（QT_TRANSLATION_DIR） -add-QT-TR $（OSX_QT_TRANSLATIONS） -详细 2
+
+deploydir：$（APP_DIST_EXTRAS）
+万一
+
+如果 TARGET_DARWIN
+应用程序包：$（OSX_APP_BUILT）
+部署：$（OSX_DMG）
+万一
+如果 TARGET_WINDOWS
+部署：$( BITCOIN_WIN_INSTALLER )
+万一
+
+$( BITCOIN_QT_BIN ) : FORCE
+	$( MAKE ) -C src qt/ $( @F )
+
+$( BITCOIND_BIN )：强制
+	$( MAKE ) -C src $( @F )
+
+$( BITCOIN_CLI_BIN )：强制
+	$( MAKE ) -C src $( @F )
+
+如果 USE_LCOV
+
+基线信息：
+	$( LCOV ) -c -i -d $( abs_builddir ) /src -o $@
+
+base_filtered.info：baseline.info
+	$( LCOV ) -r $<  " /usr/include/* " -o $@
+
+leveldb_baseline.info：baseline_filtered.info
+	$( LCOV ) -c -i -d $( abs_builddir ) /src/leveldb -b $( abs_builddir ) /src/leveldb -o $@
+
+leveldb_baseline_filtered.info : leveldb_baseline.info
+	$( LCOV ) -r $<  " /usr/include/* " -o $@
+
+baseline_filtered_combined.info：leveldb_baseline_filtered.info baseline_filtered.info
+	$( LCOV ) -a leveldb_baseline_filtered.info -abaseline_filtered.info -o $@
+
+test_tixoncash.info：baseline_filtered_combined.info
+	$( MAKE ) -C src/ 检查
+	$( LCOV ) -c -d $( abs_builddir ) /src -t test_tixoncash -o $@
+	$( LCOV ) -z -d $( abs_builddir ) /src
+	$( LCOV ) -z -d $( abs_builddir ) /src/leveldb
+
+test_tixoncash_filtered.info : test_tixoncash.info
+	$( LCOV ) -r $<  " /usr/include/* " -o $@
+
+block_test.info : test_tixoncash_filtered.info
+	$( MKDIR_P ) qa/tmp
+	-@TIMEOUT=15 qa/pull-tester/run-bitcoind-for-test.sh $( JAVA ) -jar $( JAVA_COMPARISON_TOOL ) qa/tmp/compTool 0
+	$( LCOV ) -c -d $( abs_builddir ) /src --t BitcoinJBlockTest -o $@
+	$( LCOV ) -z -d $( abs_builddir ) /src
+	$( LCOV ) -z -d $( abs_builddir ) /src/leveldb
+
+block_test_filtered.info : block_test.info
+	$( LCOV ) -r $<  " /usr/include/* " -o $@
+
+test_tixoncash_coverage.info：baseline_filtered_combined.info test_tixoncash_filtered.info
+	$( LCOV ) -a base_filtered.info -a leveldb_baseline_filtered.info -a test_tixoncash_filtered.info -o $@
+
+total_coverage.info：baseline_filtered_combined.info test_tixoncash_filtered.info block_test_filtered.info
+	$( LCOV ) -a baseline_filtered.info -a leveldb_baseline_filtered.info -a test_tixoncash_filtered.info -a block_test_filtered.info -o $@  |  $( GREP )  " \% "  |  $( AWK )  ' { print substr($3,2,50) "/" $$5 } '  > coverage_percent.txt
+
+test_tixoncash.coverage/.dirstamp : test_tixoncash_coverage.info
+	$( GENHTML ) -s $< -o $( @D )
+@	触摸$@
+
+total.coverage/.dirstamp : total_coverage.info
+	$( GENHTML ) -s $< -o $( @D )
+@	触摸$@
+
+cov : test_tixoncash.coverage/.dirstamp total.coverage/.dirstamp
+
+万一
+
+dist_noinst_SCRIPTS = autogen.sh
+
+EXTRA_DIST = $( top_srcdir ) /share/genbuild.sh qa/pull-tester/rpc-tests.sh qa/pull-tester/run-bitcoin-cli qa/rpc-tests $( DIST_DOCS )  $( WINDOWS_PACKAGING )  $( OSX_PACKAGING )
+
+CLEANFILES = $( OSX_DMG )  $( BITCOIN_WIN_INSTALLER )
+
+.中级：$( COVERAGE_INFO )
+
+清洁本地：
+	rm -rf test_tixoncash.coverage/ total.coverage/ $( OSX_APP )
+© 2021 GitHub, Inc.
+条款
+隐私
+安全
+地位
+文档
+联系 GitHub
+价钱
+应用程序接口
+训练
+博客
+关于
+加载完成
