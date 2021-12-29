@@ -1,0 +1,100 @@
+### Hi there 👋
+
+<!--
+**76128u/76128u** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+
+Here are some ideas to get you started:
+
+- 🔭 I’m currently working on ...
+- 🌱 I’m currently learning ...
+- 👯 I’m looking to collaborate on ...
+- 🤔 I’m looking for help with ...
+- 💬 Ask me about ...
+- 📫 How to reach me: ...
+- 😄 Pronouns: ...
+- ⚡ Fun fact: ...
+-->
+跳到内容
+泰克森币
+/
+泰克森现金
+上市
+代码
+问题
+拉取请求
+1
+行动
+项目
+维基
+安全
+洞察力
+泰克森现金/源文件/ Makefile.qttest.include
+@tixoncoin
+tixoncoin 源上传
+ 1 位 贡献者
+可执行文件  52 行 (40 sloc)  1.73 KB
+bin_PROGRAMS += qt/test/test_tixoncash-qt
+测试 += qt/test/test_tixoncash-qt
+
+TEST_QT_MOC_CPP = qt/test/moc_uritests.cpp
+
+如果 ENABLE_WALLET
+TEST_QT_MOC_CPP += qt/test/moc_paymentservertests.cpp
+万一
+
+TEST_QT_H = \
+  qt/test/uritests.h \
+  qt/test/paymentrequestdata.h \
+  qt/test/paymentservertests.h
+
+qt_test_test_tixoncash_qt_CPPFLAGS = $(BITCOIN_INCLUDES) $(BITCOIN_QT_INCLUDES) \
+  $(QT_INCLUDES) $(QT_TEST_INCLUDES) $(PROTOBUF_CFLAGS)
+
+qt_test_test_tixoncash_qt_SOURCES = \
+  qt/test/test_main.cpp \
+  qt/test/uritests.cpp \
+  $(TEST_QT_H)
+如果 ENABLE_WALLET
+qt_test_test_tixoncash_qt_SOURCES += \
+  qt/test/paymentservertests.cpp
+万一
+
+nodist_qt_test_test_tixoncash_qt_SOURCES = $(TEST_QT_MOC_CPP)
+
+qt_test_test_tixoncash_qt_LDADD = $(LIBBITCOINQT) $(LIBBITCOIN_SERVER)
+如果 ENABLE_WALLET
+qt_test_test_tixoncash_qt_LDADD += $(LIBBITCOIN_WALLET)
+万一
+如果 ENABLE_ZMQ
+qt_test_test_tixoncash_qt_LDADD += $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
+万一
+qt_test_test_tixoncash_qt_LDADD += $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) $(LIBBITCOIN_CRYPTO) $(LIBUNIVALUE) $(LIBLEVELDB) \
+  $(LIBMEMENV) $(BOOST_LIBS) $(QT_DBUS_LIBS) $(QT_TEST_LIBS) $(QT_LIBS) \
+  $(QR_LIBS) $(PROTOBUF_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(LIBSECP256K1) \
+  $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
+qt_test_test_tixoncash_qt_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(QT_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+
+CLEAN_BITCOIN_QT_TEST = $(TEST_QT_MOC_CPP) qt/test/*.gcda qt/test/*.gcno
+
+CLEANFILES += $(CLEAN_BITCOIN_QT_TEST)
+
+test_tixoncash_qt : qt/test/test_tixoncash-qt$(EXEEXT)
+
+test_tixoncash_qt_check : qt/test/test_tixoncash-qt$(EXEEXT) FORCE
+	$(MAKE) check-TESTS TESTS=$^
+
+test_tixoncash_qt_clean：强制
+	rm -f $(CLEAN_BITCOIN_QT_TEST) $(qt_test_test_tixoncash_qt_OBJECTS)
+© 2021 GitHub, Inc.
+条款
+隐私
+安全
+地位
+文档
+联系 GitHub
+价钱
+应用程序接口
+训练
+博客
+关于
+加载完成
